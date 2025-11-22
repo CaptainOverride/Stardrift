@@ -3,6 +3,7 @@ import { Canvas } from '@react-three/fiber'
 import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import { Ship } from './Ship'
 import { Background } from './Background'
+import { GridFloor } from './GridFloor'
 import { Collectibles } from './Collectibles'
 import { ParticleSystem } from './ParticleSystem'
 import './App.css'
@@ -47,6 +48,7 @@ function App() {
           <pointLight position={[10, 10, 10]} />
 
           <Background />
+          <GridFloor />
           <Ship />
           {gameStarted && <Collectibles />}
           {gameStarted && <ParticleSystem />}

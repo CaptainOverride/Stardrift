@@ -63,14 +63,32 @@ export function Ship() {
 
     return (
         <group ref={shipRef}>
+            {/* Main Body - Cone pointing UP to show direction */}
             <mesh rotation={[Math.PI / 2, 0, 0]}>
                 <coneGeometry args={[0.5, 2, 4]} />
                 <meshStandardMaterial color="#00ffff" emissive="#00ffff" emissiveIntensity={0.5} roughness={0.1} />
             </mesh>
 
+            {/* Directional Indicator - Bright tip to show "front" */}
+            <mesh position={[0, 1, 0]}>
+                <sphereGeometry args={[0.2]} />
+                <meshBasicMaterial color="#ffffff" />
+            </mesh>
+
+            {/* Engine Glow at back */}
             <mesh position={[0, -1, 0]}>
                 <sphereGeometry args={[0.3]} />
                 <meshBasicMaterial color="#ff00ff" />
+            </mesh>
+
+            {/* Wing indicators for orientation */}
+            <mesh position={[-0.4, 0, 0]}>
+                <boxGeometry args={[0.3, 0.1, 0.1]} />
+                <meshStandardMaterial color="#00ffff" emissive="#00ffff" emissiveIntensity={0.3} />
+            </mesh>
+            <mesh position={[0.4, 0, 0]}>
+                <boxGeometry args={[0.3, 0.1, 0.1]} />
+                <meshStandardMaterial color="#00ffff" emissive="#00ffff" emissiveIntensity={0.3} />
             </mesh>
         </group>
     )

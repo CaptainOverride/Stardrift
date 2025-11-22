@@ -46,19 +46,24 @@ export function Collectibles({ count = 20 }) {
     return (
         <>
             {orbs.map((orb, i) => (
-                <mesh
-                    key={i}
-                    position={orb.position}
-                    ref={(el) => (orbRefs.current[i] = el)}
-                >
-                    <sphereGeometry args={[0.5, 16, 16]} />
-                    <meshStandardMaterial
-                        color="#ffaa00"
-                        emissive="#ffaa00"
-                        emissiveIntensity={2}
-                        toneMapped={false}
-                    />
-                </mesh>
+                <group key={i} position={orb.position} ref={(el) => {
+                    if (el) orbRefs.current[i] = el.children[0]
+                }}>
+                    <mesh>
+                        <sphereGeometry args={[0.5, 16, 16]} />
+                        <meshStandardMaterial
+                            color="#ffaa00"
+                            emissive="#ffaa00"
+                            emissiveIntensity={2}
+                            toneMapped={false}
+                        />
+                    </mesh>
+                    {/* Distance indicator ring */}
+                    <mesh rotation={[Math.PI / 2, 0, 0]}>
+                        <ringGeometry args={[0.8, 1.0, 32]} />
+                        <meshBasicMaterial color="#ffaa00" transparent opacity={0.3} />
+                    </mesh>
+                </group>
             ))}
         </>
     )
