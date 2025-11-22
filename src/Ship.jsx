@@ -84,45 +84,148 @@ export function Ship() {
                 <Line
                     points={trailPoints.current}
                     color="#00ffff"
-                    lineWidth={2}
+                    lineWidth={3}
                     transparent
-                    opacity={0.5}
+                    opacity={0.6}
                 />
             )}
 
-            {/* Main Body - Cone pointing UP (forward direction) */}
-            <mesh rotation={[Math.PI / 2, 0, 0]}>
-                <coneGeometry args={[0.5, 2, 4]} />
-                <meshStandardMaterial color="#00ffff" emissive="#00ffff" emissiveIntensity={0.5} roughness={0.1} />
-            </mesh>
+            {/* Main Futuristic Ship Body */}
+            <group>
+                {/* Central Hull - Sleek elongated body */}
+                <mesh position={[0, 0.3, 0]}>
+                    <boxGeometry args={[0.6, 1.8, 0.3]} />
+                    <meshStandardMaterial
+                        color="#1a1a2e"
+                        metalness={0.9}
+                        roughness={0.2}
+                        emissive="#0a0a1a"
+                        emissiveIntensity={0.2}
+                    />
+                </mesh>
 
-            {/* Directional Indicator - Bright tip to show "front" */}
-            <mesh position={[0, 1.2, 0]}>
-                <sphereGeometry args={[0.25]} />
-                <meshBasicMaterial color="#ffffff" />
-            </mesh>
+                {/* Cockpit - Front section */}
+                <mesh position={[0, 1.1, 0.05]}>
+                    <boxGeometry args={[0.5, 0.6, 0.25]} />
+                    <meshStandardMaterial
+                        color="#00ffff"
+                        metalness={0.8}
+                        roughness={0.1}
+                        emissive="#00ffff"
+                        emissiveIntensity={0.8}
+                        transparent
+                        opacity={0.9}
+                    />
+                </mesh>
 
-            {/* Direction arrow for clarity */}
-            <mesh position={[0, 0.6, 0]} rotation={[0, 0, Math.PI / 2]}>
-                <coneGeometry args={[0.15, 0.4, 3]} />
-                <meshBasicMaterial color="#ffffff" />
-            </mesh>
+                {/* Nose Cone - Sharp front */}
+                <mesh position={[0, 1.6, 0]} rotation={[0, 0, 0]}>
+                    <coneGeometry args={[0.25, 0.5, 4]} />
+                    <meshStandardMaterial
+                        color="#ffffff"
+                        emissive="#ffffff"
+                        emissiveIntensity={1}
+                        toneMapped={false}
+                    />
+                </mesh>
 
-            {/* Engine Glow at back */}
-            <mesh position={[0, -1, 0]}>
-                <sphereGeometry args={[0.3]} />
-                <meshBasicMaterial color="#ff00ff" />
-            </mesh>
+                {/* Wings - Left */}
+                <group position={[-0.5, 0, 0]}>
+                    <mesh rotation={[0, 0, -0.3]}>
+                        <boxGeometry args={[0.8, 1.2, 0.1]} />
+                        <meshStandardMaterial
+                            color="#16213e"
+                            metalness={0.9}
+                            roughness={0.3}
+                            emissive="#00ffff"
+                            emissiveIntensity={0.2}
+                        />
+                    </mesh>
+                    {/* Wing tip light */}
+                    <mesh position={[-0.4, 0, 0.1]}>
+                        <sphereGeometry args={[0.1]} />
+                        <meshBasicMaterial color="#00ffff" />
+                    </mesh>
+                </group>
 
-            {/* Wing indicators for orientation */}
-            <mesh position={[-0.4, 0, 0]}>
-                <boxGeometry args={[0.3, 0.1, 0.1]} />
-                <meshStandardMaterial color="#00ffff" emissive="#00ffff" emissiveIntensity={0.3} />
-            </mesh>
-            <mesh position={[0.4, 0, 0]}>
-                <boxGeometry args={[0.3, 0.1, 0.1]} />
-                <meshStandardMaterial color="#00ffff" emissive="#00ffff" emissiveIntensity={0.3} />
-            </mesh>
+                {/* Wings - Right */}
+                <group position={[0.5, 0, 0]}>
+                    <mesh rotation={[0, 0, 0.3]}>
+                        <boxGeometry args={[0.8, 1.2, 0.1]} />
+                        <meshStandardMaterial
+                            color="#16213e"
+                            metalness={0.9}
+                            roughness={0.3}
+                            emissive="#00ffff"
+                            emissiveIntensity={0.2}
+                        />
+                    </mesh>
+                    {/* Wing tip light */}
+                    <mesh position={[0.4, 0, 0.1]}>
+                        <sphereGeometry args={[0.1]} />
+                        <meshBasicMaterial color="#00ffff" />
+                    </mesh>
+                </group>
+
+                {/* Engine Nacelles - Left */}
+                <mesh position={[-0.35, -0.5, 0]}>
+                    <cylinderGeometry args={[0.15, 0.15, 1.2, 6]} />
+                    <meshStandardMaterial
+                        color="#0f3460"
+                        metalness={0.8}
+                        roughness={0.3}
+                    />
+                </mesh>
+
+                {/* Engine Nacelles - Right */}
+                <mesh position={[0.35, -0.5, 0]}>
+                    <cylinderGeometry args={[0.15, 0.15, 1.2, 6]} />
+                    <meshStandardMaterial
+                        color="#0f3460"
+                        metalness={0.8}
+                        roughness={0.3}
+                    />
+                </mesh>
+
+                {/* Engine Glow - Left */}
+                <mesh position={[-0.35, -1.1, 0]}>
+                    <sphereGeometry args={[0.2, 16, 16]} />
+                    <meshBasicMaterial
+                        color="#ff00ff"
+                        toneMapped={false}
+                    />
+                </mesh>
+
+                {/* Engine Glow - Right */}
+                <mesh position={[0.35, -1.1, 0]}>
+                    <sphereGeometry args={[0.2, 16, 16]} />
+                    <meshBasicMaterial
+                        color="#ff00ff"
+                        toneMapped={false}
+                    />
+                </mesh>
+
+                {/* Central Engine Glow */}
+                <mesh position={[0, -0.9, 0]}>
+                    <sphereGeometry args={[0.15, 16, 16]} />
+                    <meshBasicMaterial
+                        color="#ff00ff"
+                        toneMapped={false}
+                    />
+                </mesh>
+
+                {/* Accent Lines - Left side */}
+                <mesh position={[-0.15, 0.5, 0.16]}>
+                    <boxGeometry args={[0.05, 1.5, 0.05]} />
+                    <meshBasicMaterial color="#00ffff" />
+                </mesh>
+
+                {/* Accent Lines - Right side */}
+                <mesh position={[0.15, 0.5, 0.16]}>
+                    <boxGeometry args={[0.05, 1.5, 0.05]} />
+                    <meshBasicMaterial color="#00ffff" />
+                </mesh>
+            </group>
         </group>
     )
 }
