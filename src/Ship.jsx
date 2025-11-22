@@ -24,7 +24,9 @@ export function Ship() {
         w: false,
         a: false,
         s: false,
-        d: false
+        d: false,
+        ' ': false,
+        Shift: false
     })
 
     // Event listeners for controls
@@ -55,6 +57,7 @@ export function Ship() {
             const angle = shipRef.current.rotation.z
             const thrustPower = speed * 0.1
 
+            // Horizontal Thrust
             if (keys.current.ArrowUp || keys.current.w) {
                 velocity.current.x += Math.sin(-angle) * thrustPower
                 velocity.current.y += Math.cos(angle) * thrustPower
@@ -62,6 +65,14 @@ export function Ship() {
             if (keys.current.ArrowDown || keys.current.s) {
                 velocity.current.x -= Math.sin(-angle) * thrustPower
                 velocity.current.y -= Math.cos(angle) * thrustPower
+            }
+
+            // Vertical Thrust
+            if (keys.current[' ']) {
+                velocity.current.z += thrustPower // Up
+            }
+            if (keys.current.Shift) {
+                velocity.current.z -= thrustPower // Down
             }
         }
 
@@ -91,8 +102,6 @@ export function Ship() {
         const height = 3
 
         // Calculate ideal camera position (behind and above)
-        // Forward vector is (-sin(a), cos(a))
-        // We want -Forward * dist
         const idealCx = shipRef.current.position.x - (-Math.sin(angle) * dist)
         const idealCy = shipRef.current.position.y - (Math.cos(angle) * dist)
         const idealCz = shipRef.current.position.z + height
@@ -127,7 +136,7 @@ export function Ship() {
 
             {/* Main Futuristic Ship Body - Wrapped for banking */}
             <group ref={bodyRef}>
-                {/* Central Hull - Sleek elongated body */}
+                {/* Central Hull */}
                 <mesh position={[0, 0.3, 0]}>
                     <boxGeometry args={[0.6, 1.8, 0.3]} />
                     <meshStandardMaterial
@@ -139,7 +148,7 @@ export function Ship() {
                     />
                 </mesh>
 
-                {/* Cockpit - Front section */}
+                {/* Cockpit */}
                 <mesh position={[0, 1.1, 0.05]}>
                     <boxGeometry args={[0.5, 0.6, 0.25]} />
                     <meshStandardMaterial
@@ -153,7 +162,7 @@ export function Ship() {
                     />
                 </mesh>
 
-                {/* Nose Cone - Sharp front */}
+                {/* Nose Cone */}
                 <mesh position={[0, 1.6, 0]} rotation={[0, 0, 0]}>
                     <coneGeometry args={[0.25, 0.5, 4]} />
                     <meshStandardMaterial

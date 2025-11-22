@@ -14,7 +14,7 @@ export function Collectibles({ count = 20 }) {
             position: new Vector3(
                 MathUtils.randFloatSpread(100),
                 MathUtils.randFloatSpread(100),
-                0
+                MathUtils.randFloatSpread(40) // Random height between -20 and 20
             )
         }))
     }, [count])
@@ -53,6 +53,7 @@ export function Collectibles({ count = 20 }) {
                 // Respawn far away
                 group.position.x = shipPosition.x + MathUtils.randFloatSpread(50) + (Math.random() > 0.5 ? 20 : -20)
                 group.position.y = shipPosition.y + MathUtils.randFloatSpread(50) + (Math.random() > 0.5 ? 20 : -20)
+                group.position.z = shipPosition.z + MathUtils.randFloatSpread(30)
             }
         })
 
