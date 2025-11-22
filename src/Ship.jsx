@@ -1,13 +1,16 @@
-import { useRef, useContext } from 'react'
+import { useRef, useContext, useMemo } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { Vector3 } from 'three'
 import { GameContext } from './App'
+import { Line } from '@react-three/drei'
 
 export function Ship() {
     const shipRef = useRef()
+    const trailRef = useRef()
     const speed = 0.1
     const friction = 0.95
     const velocity = useRef(new Vector3(0, 0, 0))
+    const trailPoints = useRef([])
 
     const { gameStarted, setShipPosition } = useContext(GameContext)
 
@@ -48,12 +51,20 @@ export function Ship() {
         shipRef.current.rotation.z = -velocity.current.x * 2
         shipRef.current.rotation.x = velocity.current.y * 2
 
-        // 4. Camera Follow (smooth)
+        // 4. Update trail
+        if (gameStarted && velocity.current.length() > 0.01) {
+            trailPoints.current.unshift(shipRef.current.position.clone())
+            if (trailPoints.current.length > 20) {
+                trailPoints.current.pop()
+            }
+        }
+
+        // 5. Camera Follow (smooth)
         state.camera.position.x += (shipRef.current.position.x * 0.5 - state.camera.position.x) * 0.1
         state.camera.position.y += (shipRef.current.position.y * 0.5 - state.camera.position.y) * 0.1
         state.camera.lookAt(shipRef.current.position.x, shipRef.current.position.y, 0)
 
-        // 5. Update position in context
+        // 6. Update position in context
         setShipPosition({
             x: shipRef.current.position.x,
             y: shipRef.current.position.y,
@@ -63,6 +74,17 @@ export function Ship() {
 
     return (
         <group ref={shipRef}>
+            {/* Velocity trail */}
+            {trailPoints.current.length > 1 && (
+                <Line
+                    points={trailPoints.current}
+                    color="#00ffff"
+                    lineWidth={2}
+                    transparent
+                    opacity={0.5}
+                />
+            )}
+
             {/* Main Body - Cone pointing UP to show direction */}
             <mesh rotation={[Math.PI / 2, 0, 0]}>
                 <coneGeometry args={[0.5, 2, 4]} />
@@ -70,8 +92,14 @@ export function Ship() {
             </mesh>
 
             {/* Directional Indicator - Bright tip to show "front" */}
-            <mesh position={[0, 1, 0]}>
-                <sphereGeometry args={[0.2]} />
+            <mesh position={[0, 1.2, 0]}>
+                <sphereGeometry args={[0.25]} />
+                <meshBasicMaterial color="#ffffff" />
+            </mesh>
+
+            {/* Direction arrow for clarity */}
+            <mesh position={[0, 0.6, 0]} rotation={[0, 0, Math.PI / 2]}>
+                <coneGeometry args={[0.15, 0.4, 3]} />
                 <meshBasicMaterial color="#ffffff" />
             </mesh>
 
