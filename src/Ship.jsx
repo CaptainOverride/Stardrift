@@ -1,6 +1,7 @@
 import { useRef, useContext, useMemo } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { Vector3, MathUtils } from 'three'
+import * as THREE from 'three'
 import { GameContext } from './App'
 import { Line, Html } from '@react-three/drei'
 
@@ -144,21 +145,33 @@ export function Ship() {
             }
         }
 
-        // 6. Camera Chase
-        const angle = shipRef.current.rotation.z
-        const dist = 10 // Further back
-        const height = 4 // Higher up
+        // 6. Camera Chase (Rigid Follow)
+        if (bodyRef.current) {
+            // Calculate target position relative to the ship's full rotation (Heading + Pitch + Roll)
+            // We want the camera behind and slightly above the ship's LOCAL axes
 
-        // Smooth camera follow
-        const idealCx = shipRef.current.position.x - (-Math.sin(angle) * dist)
-        const idealCy = shipRef.current.position.y - (Math.cos(angle) * dist)
-        const idealCz = shipRef.current.position.z + height
+            // Get the world rotation of the ship body
+            const worldQuat = new THREE.Quaternion()
+            bodyRef.current.getWorldQuaternion(worldQuat)
 
-        state.camera.position.x += (idealCx - state.camera.position.x) * 0.05 // Smoother lag
-        state.camera.position.y += (idealCy - state.camera.position.y) * 0.05
-        state.camera.position.z += (idealCz - state.camera.position.z) * 0.05
+            // Offset: Behind (y: -10) and Above (z: 4) relative to ship
+            const offset = new Vector3(0, -12, 5)
+            offset.applyQuaternion(worldQuat)
 
-        state.camera.lookAt(shipRef.current.position)
+            // Target Camera Position
+            const targetPos = shipRef.current.position.clone().add(offset)
+
+            // Smoothly move camera to target
+            state.camera.position.lerp(targetPos, 0.1)
+
+            // Update Camera Up vector to match ship's banking (Roll)
+            const targetUp = new Vector3(0, 0, 1)
+            targetUp.applyQuaternion(worldQuat)
+            state.camera.up.lerp(targetUp, 0.1)
+
+            // Look at the ship
+            state.camera.lookAt(shipRef.current.position)
+        }
 
         // 7. Context Sync
         setShipPosition({
