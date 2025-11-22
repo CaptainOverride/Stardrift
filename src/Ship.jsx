@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { Vector3 } from 'three'
+import { Trail } from '@react-three/drei'
 
 export function Ship() {
     const shipRef = useRef()
@@ -63,11 +64,23 @@ export function Ship() {
                 <meshStandardMaterial color="#00ffff" emissive="#00ffff" emissiveIntensity={0.5} roughness={0.1} />
             </mesh>
 
-            {/* Engine Glow */}
+            {/* Engine Glow & Trail */}
             <mesh position={[0, -1, 0]}>
                 <sphereGeometry args={[0.3]} />
                 <meshBasicMaterial color="#ff00ff" />
             </mesh>
+
+            <Trail
+                width={1} // Width of the line
+                length={8} // Length of the trail
+                color={new Vector3(10, 0, 10)} // RGB values for color (High values = Bloom)
+                attenuation={(t) => t * t} // Tapering function
+            >
+                <mesh position={[0, -1, 0]}>
+                    <sphereGeometry args={[0.1]} />
+                    <meshBasicMaterial color="hotpink" />
+                </mesh>
+            </Trail>
         </group>
     )
 }
