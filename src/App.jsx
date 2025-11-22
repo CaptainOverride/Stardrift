@@ -1,5 +1,6 @@
 import { Canvas } from '@react-three/fiber'
-import { OrbitControls, Stars } from '@react-three/drei'
+import { Stars } from '@react-three/drei'
+import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import { Ship } from './Ship'
 import './App.css'
 
@@ -15,7 +16,9 @@ function App() {
 
         <Ship />
 
-        <OrbitControls enableZoom={false} />
+        <EffectComposer>
+          <Bloom luminanceThreshold={0} luminanceSmoothing={0.9} height={300} />
+        </EffectComposer>
       </Canvas>
 
       <div className="ui-layer">

@@ -32,7 +32,6 @@ export function Ship() {
         if (keys.current.ArrowDown || keys.current.s) velocity.current.y -= speed * 0.1
         if (keys.current.ArrowLeft || keys.current.a) velocity.current.x -= speed * 0.1
         if (keys.current.ArrowRight || keys.current.d) velocity.current.x += speed * 0.1
-
         // 2. Apply Physics (Velocity + Friction)
         velocity.current.multiplyScalar(friction)
         shipRef.current.position.add(velocity.current)
@@ -40,6 +39,20 @@ export function Ship() {
         // 3. Tilt/Bank effect based on velocity
         shipRef.current.rotation.z = -velocity.current.x * 2 // Bank left/right
         shipRef.current.rotation.x = velocity.current.y * 2  // Pitch up/down
+
+        // 4. Camera Follow
+        // We access the camera via the state object in useFrame, but we need to grab it from the context or pass it in.
+        // Actually, useFrame provides state as the first argument.
+    }, 1) // Priority 1 to ensure it runs after other updates if needed
+
+    useFrame((state) => {
+        if (!shipRef.current) return
+
+        // Camera Follow Logic
+        // Smoothly interpolate camera position to target
+        state.camera.position.x += (shipRef.current.position.x * 0.5 - state.camera.position.x) * 0.1
+        state.camera.position.y += (shipRef.current.position.y * 0.5 - state.camera.position.y) * 0.1
+        state.camera.lookAt(shipRef.current.position.x, shipRef.current.position.y, 0)
     })
 
     return (
