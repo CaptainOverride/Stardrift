@@ -1,11 +1,11 @@
-import { useRef, useMemo } from 'react'
+import { useRef, useMemo, useContext } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { Vector3, MathUtils } from 'three'
-import { useStore } from './store'
+import { GameContext } from './App'
 import { audio } from './SoundManager'
 
 export function Collectibles({ count = 20 }) {
-    const { shipPosition, increaseScore, triggerExplosion } = useStore()
+    const { shipPosition, increaseScore, triggerExplosion } = useContext(GameContext)
 
     // Generate random initial positions
     const orbs = useMemo(() => {
@@ -14,8 +14,7 @@ export function Collectibles({ count = 20 }) {
                 MathUtils.randFloatSpread(100),
                 MathUtils.randFloatSpread(100),
                 0
-            ),
-            ref: null // We'll attach refs dynamically if needed, or just use the position array
+            )
         }))
     }, [count])
 
@@ -30,7 +29,8 @@ export function Collectibles({ count = 20 }) {
             mesh.position.y += Math.sin(state.clock.elapsedTime * 2 + i) * 0.01
 
             // 2. Collision Detection
-            if (shipPosition.distanceTo(mesh.position) < 2) {
+            const shipPos = new Vector3(shipPosition.x, shipPosition.y, shipPosition.z)
+            if (shipPos.distanceTo(mesh.position) < 2) {
                 // Collected!
                 increaseScore()
                 audio.playCollectSound()

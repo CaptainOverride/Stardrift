@@ -1,7 +1,7 @@
-import { useRef, useMemo, useEffect } from 'react'
+import { useRef, useMemo, useEffect, useContext } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { Object3D, MathUtils, Vector3 } from 'three'
-import { useStore } from './store'
+import { GameContext } from './App'
 
 const PARTICLE_COUNT = 500
 let particleIndex = 0
@@ -9,7 +9,7 @@ let particleIndex = 0
 export function ParticleSystem() {
     const meshRef = useRef()
     const dummy = useMemo(() => new Object3D(), [])
-    const explosionData = useStore((state) => state.explosionData)
+    const { explosionData } = useContext(GameContext)
 
     // Particle state: position, velocity, life
     const particles = useMemo(() => {
@@ -28,7 +28,7 @@ export function ParticleSystem() {
         for (let i = 0; i < 20; i++) {
             const p = particles[particleIndex]
             p.life = 1.0
-            p.position.copy(explosionData.position)
+            p.position.set(explosionData.position.x, explosionData.position.y, explosionData.position.z)
             p.scale = Math.random() * 0.5 + 0.2
 
             // Random explosion velocity

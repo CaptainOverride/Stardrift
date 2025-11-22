@@ -1,12 +1,15 @@
-import { useRef } from 'react'
+import { useRef, useContext } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { Vector3 } from 'three'
+import { GameContext } from './App'
 
 export function Ship() {
     const shipRef = useRef()
     const speed = 0.1
     const friction = 0.95
     const velocity = useRef(new Vector3(0, 0, 0))
+
+    const { gameStarted, setShipPosition } = useContext(GameContext)
 
     // Track keys
     const keys = useRef({
@@ -29,11 +32,13 @@ export function Ship() {
     useFrame((state) => {
         if (!shipRef.current) return
 
-        // 1. Calculate Thrust - always enabled for now
-        if (keys.current.ArrowUp || keys.current.w) velocity.current.y += speed * 0.1
-        if (keys.current.ArrowDown || keys.current.s) velocity.current.y -= speed * 0.1
-        if (keys.current.ArrowLeft || keys.current.a) velocity.current.x -= speed * 0.1
-        if (keys.current.ArrowRight || keys.current.d) velocity.current.x += speed * 0.1
+        // 1. Calculate Thrust (only if game started)
+        if (gameStarted) {
+            if (keys.current.ArrowUp || keys.current.w) velocity.current.y += speed * 0.1
+            if (keys.current.ArrowDown || keys.current.s) velocity.current.y -= speed * 0.1
+            if (keys.current.ArrowLeft || keys.current.a) velocity.current.x -= speed * 0.1
+            if (keys.current.ArrowRight || keys.current.d) velocity.current.x += speed * 0.1
+        }
 
         // 2. Apply Physics
         velocity.current.multiplyScalar(friction)
@@ -47,6 +52,13 @@ export function Ship() {
         state.camera.position.x += (shipRef.current.position.x * 0.5 - state.camera.position.x) * 0.1
         state.camera.position.y += (shipRef.current.position.y * 0.5 - state.camera.position.y) * 0.1
         state.camera.lookAt(shipRef.current.position.x, shipRef.current.position.y, 0)
+
+        // 5. Update position in context
+        setShipPosition({
+            x: shipRef.current.position.x,
+            y: shipRef.current.position.y,
+            z: shipRef.current.position.z
+        })
     })
 
     return (
