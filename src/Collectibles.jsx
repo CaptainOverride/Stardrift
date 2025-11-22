@@ -3,10 +3,9 @@ import { useFrame } from '@react-three/fiber'
 import { Vector3, MathUtils } from 'three'
 import { useStore } from './store'
 import { audio } from './SoundManager'
-import { triggerExplosion } from './ParticleSystem'
 
 export function Collectibles({ count = 20 }) {
-    const { shipPosition, increaseScore } = useStore()
+    const { shipPosition, increaseScore, triggerExplosion } = useStore()
 
     // Generate random initial positions
     const orbs = useMemo(() => {

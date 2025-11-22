@@ -1,18 +1,15 @@
 import { useRef, useMemo, useEffect } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { Object3D, MathUtils, Vector3 } from 'three'
+import { useStore } from './store'
 
 const PARTICLE_COUNT = 500
 let particleIndex = 0
 
-// We'll export this to call it from anywhere (simple global event bus style)
-export let triggerExplosion = (position) => {
-    // This will be assigned by the component
-}
-
 export function ParticleSystem() {
     const meshRef = useRef()
     const dummy = useMemo(() => new Object3D(), [])
+    const explosionData = useStore((state) => state.explosionData)
 
     // Particle state: position, velocity, life
     const particles = useMemo(() => {
@@ -25,26 +22,25 @@ export function ParticleSystem() {
     }, [])
 
     useEffect(() => {
-        // Assign the global trigger function
-        triggerExplosion = (pos) => {
-            // Spawn 20 particles per explosion
-            for (let i = 0; i < 20; i++) {
-                const p = particles[particleIndex]
-                p.life = 1.0
-                p.position.copy(pos)
-                p.scale = Math.random() * 0.5 + 0.2
+        if (!explosionData) return
 
-                // Random explosion velocity
-                p.velocity.set(
-                    MathUtils.randFloatSpread(0.5),
-                    MathUtils.randFloatSpread(0.5),
-                    MathUtils.randFloatSpread(0.5)
-                )
+        // Spawn 20 particles per explosion
+        for (let i = 0; i < 20; i++) {
+            const p = particles[particleIndex]
+            p.life = 1.0
+            p.position.copy(explosionData.position)
+            p.scale = Math.random() * 0.5 + 0.2
 
-                particleIndex = (particleIndex + 1) % PARTICLE_COUNT
-            }
+            // Random explosion velocity
+            p.velocity.set(
+                MathUtils.randFloatSpread(0.5),
+                MathUtils.randFloatSpread(0.5),
+                MathUtils.randFloatSpread(0.5)
+            )
+
+            particleIndex = (particleIndex + 1) % PARTICLE_COUNT
         }
-    }, [particles])
+    }, [explosionData, particles])
 
     useFrame(() => {
         if (!meshRef.current) return
