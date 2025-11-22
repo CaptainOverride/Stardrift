@@ -6,9 +6,9 @@ import { Line } from '@react-three/drei'
 
 export function Ship() {
     const shipRef = useRef()
-    const trailRef = useRef()
     const speed = 0.15
-    const friction = 0.92
+    const friction = 0.95
+    const rotationSpeed = 0.05
     const velocity = useRef(new Vector3(0, 0, 0))
     const trailPoints = useRef([])
 
@@ -35,26 +35,36 @@ export function Ship() {
     useFrame((state) => {
         if (!shipRef.current) return
 
-        // 1. Calculate Thrust - Simple 2D top-down controls
+        // 1. Rotation Controls - A/D rotate the ship
         if (gameStarted) {
-            // Up/Down on screen = Y axis
-            if (keys.current.ArrowUp || keys.current.w) velocity.current.y += speed * 0.1
-            if (keys.current.ArrowDown || keys.current.s) velocity.current.y -= speed * 0.1
-
-            // Left/Right on screen = X axis
-            if (keys.current.ArrowLeft || keys.current.a) velocity.current.x -= speed * 0.1
-            if (keys.current.ArrowRight || keys.current.d) velocity.current.x += speed * 0.1
+            if (keys.current.ArrowLeft || keys.current.a) {
+                shipRef.current.rotation.z += rotationSpeed // Rotate left
+            }
+            if (keys.current.ArrowRight || keys.current.d) {
+                shipRef.current.rotation.z -= rotationSpeed // Rotate right
+            }
         }
 
-        // 2. Apply Physics
+        // 2. Thrust Controls - W/S thrust forward/backward in the direction ship is facing
+        if (gameStarted) {
+            const angle = shipRef.current.rotation.z
+            const thrustPower = speed * 0.1
+
+            if (keys.current.ArrowUp || keys.current.w) {
+                // Thrust forward in the direction the ship is facing
+                velocity.current.x += Math.sin(-angle) * thrustPower
+                velocity.current.y += Math.cos(angle) * thrustPower
+            }
+            if (keys.current.ArrowDown || keys.current.s) {
+                // Thrust backward (reverse)
+                velocity.current.x -= Math.sin(-angle) * thrustPower
+                velocity.current.y -= Math.cos(angle) * thrustPower
+            }
+        }
+
+        // 3. Apply Physics (drift in space)
         velocity.current.multiplyScalar(friction)
         shipRef.current.position.add(velocity.current)
-
-        // 3. Rotate ship to face movement direction (like asteroids/top-down shooters)
-        if (velocity.current.length() > 0.01) {
-            const angle = Math.atan2(velocity.current.x, velocity.current.y)
-            shipRef.current.rotation.z = -angle
-        }
 
         // 4. Update trail
         if (gameStarted && velocity.current.length() > 0.01) {
