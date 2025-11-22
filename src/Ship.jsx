@@ -6,9 +6,10 @@ import { Line } from '@react-three/drei'
 
 export function Ship() {
     const shipRef = useRef()
+    const bodyRef = useRef()
     const speed = 0.15
     const friction = 0.95
-    const rotationSpeed = 0.05
+    const rotationSpeed = 0.04
     const velocity = useRef(new Vector3(0, 0, 0))
     const trailPoints = useRef([])
 
@@ -35,38 +36,48 @@ export function Ship() {
     useFrame((state) => {
         if (!shipRef.current) return
 
+        let isTurning = 0 // -1 left, 1 right
+
         // 1. Rotation Controls - A/D rotate the ship
         if (gameStarted) {
             if (keys.current.ArrowLeft || keys.current.a) {
-                shipRef.current.rotation.z += rotationSpeed // Rotate left
+                shipRef.current.rotation.z += rotationSpeed
+                isTurning = 1 // Left turn (positive rotation)
             }
             if (keys.current.ArrowRight || keys.current.d) {
-                shipRef.current.rotation.z -= rotationSpeed // Rotate right
+                shipRef.current.rotation.z -= rotationSpeed
+                isTurning = -1 // Right turn (negative rotation)
             }
         }
 
-        // 2. Thrust Controls - W/S thrust forward/backward in the direction ship is facing
+        // 2. Thrust Controls - W/S thrust forward/backward
         if (gameStarted) {
             const angle = shipRef.current.rotation.z
             const thrustPower = speed * 0.1
 
             if (keys.current.ArrowUp || keys.current.w) {
-                // Thrust forward in the direction the ship is facing
                 velocity.current.x += Math.sin(-angle) * thrustPower
                 velocity.current.y += Math.cos(angle) * thrustPower
             }
             if (keys.current.ArrowDown || keys.current.s) {
-                // Thrust backward (reverse)
                 velocity.current.x -= Math.sin(-angle) * thrustPower
                 velocity.current.y -= Math.cos(angle) * thrustPower
             }
         }
 
-        // 3. Apply Physics (drift in space)
+        // 3. Apply Physics
         velocity.current.multiplyScalar(friction)
         shipRef.current.position.add(velocity.current)
 
-        // 4. Update trail
+        // 4. Visual Banking (Roll)
+        if (bodyRef.current) {
+            // Target roll angle based on turning
+            const targetRoll = isTurning * 0.5 // 0.5 radians bank
+            // Smoothly interpolate current roll to target
+            bodyRef.current.rotation.y += (targetRoll - bodyRef.current.rotation.y) * 0.1
+        }
+
+        // 5. Update trail
         if (gameStarted && velocity.current.length() > 0.01) {
             trailPoints.current.unshift(shipRef.current.position.clone())
             if (trailPoints.current.length > 20) {
@@ -74,12 +85,26 @@ export function Ship() {
             }
         }
 
-        // 5. Camera Follow (smooth)
-        state.camera.position.x += (shipRef.current.position.x * 0.5 - state.camera.position.x) * 0.1
-        state.camera.position.y += (shipRef.current.position.y * 0.5 - state.camera.position.y) * 0.1
-        state.camera.lookAt(shipRef.current.position.x, shipRef.current.position.y, 0)
+        // 6. Third-Person Chase Camera
+        const angle = shipRef.current.rotation.z
+        const dist = 8
+        const height = 3
 
-        // 6. Update position in context
+        // Calculate ideal camera position (behind and above)
+        // Forward vector is (-sin(a), cos(a))
+        // We want -Forward * dist
+        const idealCx = shipRef.current.position.x - (-Math.sin(angle) * dist)
+        const idealCy = shipRef.current.position.y - (Math.cos(angle) * dist)
+        const idealCz = shipRef.current.position.z + height
+
+        state.camera.position.x += (idealCx - state.camera.position.x) * 0.1
+        state.camera.position.y += (idealCy - state.camera.position.y) * 0.1
+        state.camera.position.z += (idealCz - state.camera.position.z) * 0.1
+
+        state.camera.up.set(0, 0, 1) // Keep Z as up
+        state.camera.lookAt(shipRef.current.position)
+
+        // 7. Update position in context
         setShipPosition({
             x: shipRef.current.position.x,
             y: shipRef.current.position.y,
@@ -100,8 +125,8 @@ export function Ship() {
                 />
             )}
 
-            {/* Main Futuristic Ship Body */}
-            <group>
+            {/* Main Futuristic Ship Body - Wrapped for banking */}
+            <group ref={bodyRef}>
                 {/* Central Hull - Sleek elongated body */}
                 <mesh position={[0, 0.3, 0]}>
                     <boxGeometry args={[0.6, 1.8, 0.3]} />
