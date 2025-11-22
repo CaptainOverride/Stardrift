@@ -1,4 +1,4 @@
-import { useRef, useContext, useMemo } from 'react'
+import { useRef, useContext } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { Vector3 } from 'three'
 import { GameContext } from './App'
@@ -7,8 +7,8 @@ import { Line } from '@react-three/drei'
 export function Ship() {
     const shipRef = useRef()
     const trailRef = useRef()
-    const speed = 0.1
-    const friction = 0.95
+    const speed = 0.15
+    const friction = 0.92
     const velocity = useRef(new Vector3(0, 0, 0))
     const trailPoints = useRef([])
 
@@ -35,10 +35,13 @@ export function Ship() {
     useFrame((state) => {
         if (!shipRef.current) return
 
-        // 1. Calculate Thrust (only if game started)
+        // 1. Calculate Thrust - Simple 2D top-down controls
         if (gameStarted) {
+            // Up/Down on screen = Y axis
             if (keys.current.ArrowUp || keys.current.w) velocity.current.y += speed * 0.1
             if (keys.current.ArrowDown || keys.current.s) velocity.current.y -= speed * 0.1
+
+            // Left/Right on screen = X axis
             if (keys.current.ArrowLeft || keys.current.a) velocity.current.x -= speed * 0.1
             if (keys.current.ArrowRight || keys.current.d) velocity.current.x += speed * 0.1
         }
@@ -47,9 +50,11 @@ export function Ship() {
         velocity.current.multiplyScalar(friction)
         shipRef.current.position.add(velocity.current)
 
-        // 3. Tilt/Bank effect
-        shipRef.current.rotation.z = -velocity.current.x * 2
-        shipRef.current.rotation.x = velocity.current.y * 2
+        // 3. Rotate ship to face movement direction (like asteroids/top-down shooters)
+        if (velocity.current.length() > 0.01) {
+            const angle = Math.atan2(velocity.current.x, velocity.current.y)
+            shipRef.current.rotation.z = -angle
+        }
 
         // 4. Update trail
         if (gameStarted && velocity.current.length() > 0.01) {
@@ -85,7 +90,7 @@ export function Ship() {
                 />
             )}
 
-            {/* Main Body - Cone pointing UP to show direction */}
+            {/* Main Body - Cone pointing UP (forward direction) */}
             <mesh rotation={[Math.PI / 2, 0, 0]}>
                 <coneGeometry args={[0.5, 2, 4]} />
                 <meshStandardMaterial color="#00ffff" emissive="#00ffff" emissiveIntensity={0.5} roughness={0.1} />
