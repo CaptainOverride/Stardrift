@@ -6,7 +6,7 @@ const PARTICLE_COUNT = 500
 let particleIndex = 0
 
 // We'll export this to call it from anywhere (simple global event bus style)
-export const triggerExplosion = (position) => {
+export let triggerExplosion = (position) => {
     // This will be assigned by the component
 }
 
