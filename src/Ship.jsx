@@ -2,12 +2,14 @@ import { useRef, useState } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { Vector3 } from 'three'
 import { Trail } from '@react-three/drei'
+import { useStore } from './store'
 
 export function Ship() {
     const shipRef = useRef()
     const speed = 0.1
     const friction = 0.95 // "Drift" factor (lower = slippery, higher = sharp)
     const velocity = useRef(new Vector3(0, 0, 0))
+    const setShipPosition = useStore((state) => state.setShipPosition)
 
     // Track keys
     const keys = useRef({
@@ -25,7 +27,7 @@ export function Ship() {
     window.onkeydown = (e) => (keys.current[e.key] = true)
     window.onkeyup = (e) => (keys.current[e.key] = false)
 
-    useFrame(() => {
+    useFrame((state) => {
         if (!shipRef.current) return
 
         // 1. Calculate Thrust
@@ -33,6 +35,7 @@ export function Ship() {
         if (keys.current.ArrowDown || keys.current.s) velocity.current.y -= speed * 0.1
         if (keys.current.ArrowLeft || keys.current.a) velocity.current.x -= speed * 0.1
         if (keys.current.ArrowRight || keys.current.d) velocity.current.x += speed * 0.1
+
         // 2. Apply Physics (Velocity + Friction)
         velocity.current.multiplyScalar(friction)
         shipRef.current.position.add(velocity.current)
@@ -42,18 +45,12 @@ export function Ship() {
         shipRef.current.rotation.x = velocity.current.y * 2  // Pitch up/down
 
         // 4. Camera Follow
-        // We access the camera via the state object in useFrame, but we need to grab it from the context or pass it in.
-        // Actually, useFrame provides state as the first argument.
-    }, 1) // Priority 1 to ensure it runs after other updates if needed
-
-    useFrame((state) => {
-        if (!shipRef.current) return
-
-        // Camera Follow Logic
-        // Smoothly interpolate camera position to target
         state.camera.position.x += (shipRef.current.position.x * 0.5 - state.camera.position.x) * 0.1
         state.camera.position.y += (shipRef.current.position.y * 0.5 - state.camera.position.y) * 0.1
         state.camera.lookAt(shipRef.current.position.x, shipRef.current.position.y, 0)
+
+        // 5. Sync position to store
+        setShipPosition(shipRef.current.position.clone())
     })
 
     return (
