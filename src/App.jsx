@@ -4,6 +4,7 @@ import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import { Ship } from './Ship'
 import { Background } from './Background'
 import { GridFloor } from './GridFloor'
+import { SpaceDust } from './SpaceDust'
 import { Collectibles } from './Collectibles'
 import { ParticleSystem } from './ParticleSystem'
 import './App.css'
@@ -15,16 +16,19 @@ function App() {
   const [gameStarted, setGameStarted] = useState(false)
   const [score, setScore] = useState(0)
   const [shipPosition, setShipPosition] = useState({ x: 0, y: 0, z: 0 })
+  const [shipVelocity, setShipVelocity] = useState({ x: 0, y: 0, z: 0 })
   const [explosionData, setExplosionData] = useState(null)
 
   const gameState = {
     gameStarted,
     score,
     shipPosition,
+    shipVelocity,
     explosionData,
     startGame: () => setGameStarted(true),
     increaseScore: () => setScore(s => s + 1),
     setShipPosition,
+    setShipVelocity,
     triggerExplosion: (position) => setExplosionData({ position, id: Math.random() })
   }
 
@@ -49,6 +53,7 @@ function App() {
 
           <Background />
           {/* <GridFloor /> */}
+          <SpaceDust />
           <Ship />
           {gameStarted && <Collectibles />}
           {gameStarted && <ParticleSystem />}
