@@ -1,6 +1,6 @@
 import { useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
-import { Grid } from '@react-three/drei'
+import * as THREE from 'three'
 
 export function GridFloor() {
     const gridRef = useRef()
@@ -8,24 +8,16 @@ export function GridFloor() {
     useFrame((state) => {
         if (!gridRef.current) return
         // Move grid with camera to create infinite illusion
-        gridRef.current.position.x = state.camera.position.x
-        gridRef.current.position.y = state.camera.position.y
+        gridRef.current.position.x = Math.floor(state.camera.position.x / 2) * 2
+        gridRef.current.position.y = Math.floor(state.camera.position.y / 2) * 2
     })
 
     return (
         <group ref={gridRef}>
-            <Grid
+            <gridHelper
+                args={[100, 50, '#0088ff', '#00ffff']}
+                rotation={[Math.PI / 2, 0, 0]}
                 position={[0, 0, -5]}
-                args={[100, 100]}
-                cellSize={2}
-                cellThickness={0.5}
-                cellColor="#00ffff"
-                sectionSize={10}
-                sectionThickness={1}
-                sectionColor="#0088ff"
-                fadeDistance={50}
-                fadeStrength={1}
-                infiniteGrid
             />
         </group>
     )

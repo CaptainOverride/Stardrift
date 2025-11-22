@@ -22,23 +22,23 @@ export function Collectibles({ count = 20 }) {
     const orbRefs = useRef([])
 
     useFrame((state) => {
-        orbRefs.current.forEach((mesh, i) => {
-            if (!mesh) return
+        orbRefs.current.forEach((group, i) => {
+            if (!group) return
 
             // 1. Animation: Bob up and down
-            mesh.position.y += Math.sin(state.clock.elapsedTime * 2 + i) * 0.01
+            group.position.y += Math.sin(state.clock.elapsedTime * 2 + i) * 0.01
 
             // 2. Collision Detection
             const shipPos = new Vector3(shipPosition.x, shipPosition.y, shipPosition.z)
-            if (shipPos.distanceTo(mesh.position) < 2) {
+            if (shipPos.distanceTo(group.position) < 2) {
                 // Collected!
                 increaseScore()
                 audio.playCollectSound()
-                triggerExplosion(mesh.position)
+                triggerExplosion(group.position)
 
                 // Respawn far away
-                mesh.position.x = shipPosition.x + MathUtils.randFloatSpread(50) + (Math.random() > 0.5 ? 20 : -20)
-                mesh.position.y = shipPosition.y + MathUtils.randFloatSpread(50) + (Math.random() > 0.5 ? 20 : -20)
+                group.position.x = shipPosition.x + MathUtils.randFloatSpread(50) + (Math.random() > 0.5 ? 20 : -20)
+                group.position.y = shipPosition.y + MathUtils.randFloatSpread(50) + (Math.random() > 0.5 ? 20 : -20)
             }
         })
     })
@@ -46,9 +46,11 @@ export function Collectibles({ count = 20 }) {
     return (
         <>
             {orbs.map((orb, i) => (
-                <group key={i} position={orb.position} ref={(el) => {
-                    if (el) orbRefs.current[i] = el.children[0]
-                }}>
+                <group
+                    key={i}
+                    position={orb.position}
+                    ref={(el) => (orbRefs.current[i] = el)}
+                >
                     <mesh>
                         <sphereGeometry args={[0.5, 16, 16]} />
                         <meshStandardMaterial
