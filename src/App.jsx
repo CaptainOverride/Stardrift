@@ -15,7 +15,7 @@ function App() {
         <ambientLight intensity={0.5} />
         <pointLight position={[10, 10, 10]} />
 
-        <Background />
+        {/* <Background /> */}
         <Ship />
       </Canvas>
     </div>
