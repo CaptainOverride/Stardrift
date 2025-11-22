@@ -48,7 +48,7 @@ function App() {
           <pointLight position={[10, 10, 10]} />
 
           <Background />
-          <GridFloor />
+          {/* <GridFloor /> */}
           <Ship />
           {gameStarted && <Collectibles />}
           {gameStarted && <ParticleSystem />}
