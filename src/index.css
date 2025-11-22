@@ -1,29 +1,281 @@
-:root {
-  font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-  color-scheme: dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #000000; /* Pure black for space */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600&display=swap');
+
+* {
+  box-sizing: border-box;
+  user-select: none;
 }
 
-body {
+body,
+html {
   margin: 0;
   padding: 0;
-  width: 100vw;
-  height: 100vh;
-  overflow: hidden; /* Prevent scrolling */
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
-}
-
-#root {
   width: 100%;
   height: 100%;
+  overflow: hidden;
+  background: #000;
+  font-family: 'Rajdhani', sans-serif;
 }
 
-canvas {
-  touch-action: none; /* Important for mobile controls later */
+.game-container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+}
+
+/* --- HUD --- */
+.hud-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  padding: 2rem;
+}
+
+.score-board {
+  position: absolute;
+  top: 2rem;
+  left: 2rem;
+  background: rgba(0, 20, 40, 0.6);
+  backdrop-filter: blur(10px);
+  padding: 1rem 2rem;
+  border-left: 4px solid #00ffff;
+  border-radius: 0 10px 10px 0;
+  transform: skewX(-15deg);
+}
+
+.score-label {
+  color: #00ffff;
+  font-size: 0.8rem;
+  letter-spacing: 2px;
+  transform: skewX(15deg);
+}
+
+.score-value {
+  color: #fff;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
+  text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+  transform: skewX(15deg);
+}
+
+.pilot-info {
+  position: absolute;
+  top: 2rem;
+  right: 2rem;
+  text-align: right;
+  background: rgba(0, 20, 40, 0.6);
+  backdrop-filter: blur(10px);
+  padding: 1rem 2rem;
+  border-right: 4px solid #ff00ff;
+  border-radius: 10px 0 0 10px;
+  transform: skewX(15deg);
+}
+
+.pilot-label {
+  color: #ff00ff;
+  font-size: 0.8rem;
+  letter-spacing: 2px;
+  transform: skewX(-15deg);
+}
+
+.pilot-name {
+  color: #fff;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  transform: skewX(-15deg);
+}
+
+.distance-indicator {
+  position: absolute;
+  bottom: 3rem;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 1rem;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.distance-label {
+  color: #aaa;
+  font-size: 0.7rem;
+  letter-spacing: 3px;
+  margin-bottom: 0.5rem;
+}
+
+.distance-value {
+  color: #ffd700;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.distance-bar {
+  width: 200px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.distance-fill {
+  height: 100%;
+  background: #ffd700;
+  box-shadow: 0 0 10px #ffd700;
+  transition: width 0.1s linear;
+}
+
+/* --- START SCREEN --- */
+.start-screen {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(5px);
+  z-index: 100;
+}
+
+.glass-panel {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 3rem;
+  width: 600px;
+  text-align: center;
+  box-shadow: 0 0 50px rgba(0, 255, 255, 0.1);
+  animation: panelFadeIn 0.5s ease-out;
+}
+
+@keyframes panelFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.game-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 4rem;
+  font-weight: 900;
+  margin: 0 0 2rem 0;
+  background: linear-gradient(to right, #00ffff, #ff00ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: 5px;
+  text-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+}
+
+.input-group {
+  margin-bottom: 2rem;
+  text-align: left;
+}
+
+.input-group label {
+  display: block;
+  color: #888;
+  font-size: 0.8rem;
+  margin-bottom: 0.5rem;
+  letter-spacing: 2px;
+}
+
+.input-group input {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 1rem;
+  color: #fff;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.2rem;
+  border-radius: 5px;
+  outline: none;
+  transition: all 0.3s;
+}
+
+.input-group input:focus {
+  border-color: #00ffff;
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
+}
+
+.controls-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.control-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.control-item span {
+  color: #aaa;
+  font-size: 0.7rem;
+  letter-spacing: 1px;
+}
+
+.key-icon {
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #fff;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.5);
+}
+
+.key-icon.wide {
+  width: 80px;
+  font-size: 0.8rem;
+}
+
+.start-btn {
+  background: linear-gradient(90deg, #00ffff, #0088ff);
+  border: none;
+  padding: 1rem 3rem;
+  color: #000;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 900;
+  font-size: 1.2rem;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
+}
+
+.start-btn:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 0 40px rgba(0, 255, 255, 0.6);
+}
+
+.start-btn:active {
+  transform: translateY(1px);
 }

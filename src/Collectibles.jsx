@@ -1,121 +1,113 @@
 import { useRef, useMemo, useContext } from 'react'
 import { useFrame } from '@react-three/fiber'
-import { Vector3, MathUtils } from 'three'
+import { Vector3, MathUtils, Object3D } from 'three'
 import { GameContext } from './App'
 import { audio } from './SoundManager'
-import { Line, Text } from '@react-three/drei'
+import { Line } from '@react-three/drei'
 
-export function Collectibles({ count = 20 }) {
-    const { shipPosition, increaseScore, triggerExplosion } = useContext(GameContext)
+export function Collectibles({ count = 30 }) {
+    const instancedMeshRef = useRef()
+    const { shipPosition, increaseScore, triggerExplosion, setNearestOrbDistance } = useContext(GameContext)
+    const nearestOrbRef = useRef(null)
 
     // Generate random initial positions
-    const orbs = useMemo(() => {
-        return new Array(count).fill(0).map(() => ({
-            position: new Vector3(
-                MathUtils.randFloatSpread(100),
-                MathUtils.randFloatSpread(100),
-                MathUtils.randFloatSpread(40) // Random height between -20 and 20
-            )
-        }))
-    }, [count])
+    const orbs = useRef(new Array(count).fill(0).map(() => ({
+        position: new Vector3(
+            MathUtils.randFloatSpread(200),
+            MathUtils.randFloatSpread(200),
+            MathUtils.randFloatSpread(60)
+        ),
+        scale: 1,
+        active: true
+    })))
 
-    // We need refs to animate orbs individually
-    const orbRefs = useRef([])
-    const nearestOrbRef = useRef(null)
-    const distanceLineRef = useRef(null)
+    const dummy = useMemo(() => new Object3D(), [])
 
     useFrame((state) => {
-        let nearestDist = Infinity
-        let nearestOrb = null
+        if (!instancedMeshRef.current) return
 
-        orbRefs.current.forEach((group, i) => {
-            if (!group) return
+        const time = state.clock.getElapsedTime()
+        let minDistance = Infinity
+        let nearestOrbPos = null
+        const shipPos = new Vector3(shipPosition.x, shipPosition.y, shipPosition.z)
 
-            // 1. Animation: Bob up and down
-            group.position.y += Math.sin(state.clock.elapsedTime * 2 + i) * 0.01
+        orbs.current.forEach((orb, i) => {
+            // Animate: Bob up and down
+            const yOffset = Math.sin(time * 2 + i) * 0.5
 
-            // 2. Find nearest orb
-            const shipPos = new Vector3(shipPosition.x, shipPosition.y, shipPosition.z)
-            const dist = shipPos.distanceTo(group.position)
+            dummy.position.copy(orb.position)
+            dummy.position.z += yOffset
 
-            if (dist < nearestDist) {
-                nearestDist = dist
-                nearestOrb = group
-            }
+            // Rotate
+            dummy.rotation.x = time
+            dummy.rotation.y = time * 0.5
 
-            // 3. Collision Detection
-            if (dist < 2) {
+            dummy.scale.setScalar(orb.scale)
+            dummy.updateMatrix()
+            instancedMeshRef.current.setMatrixAt(i, dummy.matrix)
+
+            // Collision & Distance Logic
+            const distance = dummy.position.distanceTo(shipPos)
+
+            if (distance < 2.5) {
                 // Collected!
                 increaseScore()
-                audio.playCollectSound()
-                triggerExplosion(group.position)
+                if (audio && audio.playCollectSound) audio.playCollectSound()
+                triggerExplosion(dummy.position.clone())
 
                 // Respawn far away
-                group.position.x = shipPosition.x + MathUtils.randFloatSpread(50) + (Math.random() > 0.5 ? 20 : -20)
-                group.position.y = shipPosition.y + MathUtils.randFloatSpread(50) + (Math.random() > 0.5 ? 20 : -20)
-                group.position.z = shipPosition.z + MathUtils.randFloatSpread(30)
+                orb.position.x = shipPos.x + MathUtils.randFloatSpread(100) + (Math.random() > 0.5 ? 40 : -40)
+                orb.position.y = shipPos.y + MathUtils.randFloatSpread(100) + (Math.random() > 0.5 ? 40 : -40)
+                orb.position.z = shipPos.z + MathUtils.randFloatSpread(60)
+            }
+
+            if (distance < minDistance) {
+                minDistance = distance
+                nearestOrbPos = dummy.position.clone()
             }
         })
 
-        nearestOrbRef.current = nearestOrb
+        instancedMeshRef.current.instanceMatrix.needsUpdate = true
+
+        // Update Context for HUD
+        if (setNearestOrbDistance) {
+            setNearestOrbDistance(minDistance)
+        }
+
+        nearestOrbRef.current = nearestOrbPos
     })
 
     return (
         <>
-            {/* Distance line to nearest orb */}
-            {nearestOrbRef.current && (
-                <>
-                    <Line
-                        points={[
-                            [shipPosition.x, shipPosition.y, shipPosition.z],
-                            [nearestOrbRef.current.position.x, nearestOrbRef.current.position.y, nearestOrbRef.current.position.z]
-                        ]}
-                        color="#ffaa00"
-                        lineWidth={1}
-                        dashed
-                        dashScale={2}
-                        transparent
-                        opacity={0.4}
-                    />
-                    <Text
-                        position={[
-                            (shipPosition.x + nearestOrbRef.current.position.x) / 2,
-                            (shipPosition.y + nearestOrbRef.current.position.y) / 2 + 1,
-                            0
-                        ]}
-                        fontSize={0.5}
-                        color="#ffaa00"
-                        anchorX="center"
-                        anchorY="middle"
-                    >
-                        {Math.floor(new Vector3(shipPosition.x, shipPosition.y, shipPosition.z)
-                            .distanceTo(nearestOrbRef.current.position))}m
-                    </Text>
-                </>
-            )}
+            <instancedMesh ref={instancedMeshRef} args={[null, null, count]}>
+                <sphereGeometry args={[0.8, 16, 16]} />
+                <meshStandardMaterial
+                    color="#ffd700"
+                    emissive="#ffaa00"
+                    emissiveIntensity={1.5}
+                    toneMapped={false}
+                    roughness={0.1}
+                    metalness={1}
+                />
+            </instancedMesh>
 
-            {orbs.map((orb, i) => (
-                <group
-                    key={i}
-                    position={orb.position}
-                    ref={(el) => (orbRefs.current[i] = el)}
-                >
-                    <mesh>
-                        <sphereGeometry args={[0.5, 16, 16]} />
-                        <meshStandardMaterial
-                            color="#ffaa00"
-                            emissive="#ffaa00"
-                            emissiveIntensity={2}
-                            toneMapped={false}
-                        />
-                    </mesh>
-                    {/* Distance indicator ring */}
-                    <mesh rotation={[Math.PI / 2, 0, 0]}>
-                        <ringGeometry args={[0.8, 1.0, 32]} />
-                        <meshBasicMaterial color="#ffaa00" transparent opacity={0.3} />
-                    </mesh>
-                </group>
-            ))}
+            {/* Guide Line to nearest orb */}
+            {nearestOrbRef.current && (
+                <Line
+                    points={[
+                        [shipPosition.x, shipPosition.y, shipPosition.z],
+                        [nearestOrbRef.current.x, nearestOrbRef.current.y, nearestOrbRef.current.z]
+                    ]}
+                    color="#ffd700"
+                    lineWidth={2}
+                    dashed
+                    dashScale={1}
+                    dashSize={2}
+                    gapSize={1}
+                    opacity={0.4}
+                    transparent
+                />
+            )}
         </>
     )
 }
