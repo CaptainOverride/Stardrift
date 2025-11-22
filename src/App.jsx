@@ -21,10 +21,10 @@ function App() {
         <ambientLight intensity={0.5} />
         <pointLight position={[10, 10, 10]} />
 
-        <Background />
+        {/* <Background /> */}
         <Ship />
         {gameStarted && <Collectibles />}
-        {gameStarted && <ParticleSystem />}
+        {/* {gameStarted && <ParticleSystem />} */}
 
         <EffectComposer>
           <Bloom luminanceThreshold={0} luminanceSmoothing={0.9} height={300} />
