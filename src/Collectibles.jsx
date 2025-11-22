@@ -2,6 +2,7 @@ import { useRef, useMemo } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { Vector3, MathUtils } from 'three'
 import { useStore } from './store'
+import { audio } from './SoundManager'
 
 export function Collectibles({ count = 20 }) {
     const { shipPosition, increaseScore } = useStore()
@@ -32,12 +33,11 @@ export function Collectibles({ count = 20 }) {
             if (shipPosition.distanceTo(mesh.position) < 2) {
                 // Collected!
                 increaseScore()
+                audio.playCollectSound()
 
                 // Respawn far away
                 mesh.position.x = shipPosition.x + MathUtils.randFloatSpread(50) + (Math.random() > 0.5 ? 20 : -20)
                 mesh.position.y = shipPosition.y + MathUtils.randFloatSpread(50) + (Math.random() > 0.5 ? 20 : -20)
-
-                // Add a little scale pop effect (optional, maybe later)
             }
         })
     })
