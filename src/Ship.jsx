@@ -50,9 +50,9 @@ export function Ship() {
         shipRef.current.rotation.x = velocity.current.y * 2  // Pitch up/down
 
         // 4. Camera Follow
-        state.camera.position.x += (shipRef.current.position.x * 0.5 - state.camera.position.x) * 0.1
-        state.camera.position.y += (shipRef.current.position.y * 0.5 - state.camera.position.y) * 0.1
-        state.camera.lookAt(shipRef.current.position.x, shipRef.current.position.y, 0)
+        // state.camera.position.x += (shipRef.current.position.x * 0.5 - state.camera.position.x) * 0.1
+        // state.camera.position.y += (shipRef.current.position.y * 0.5 - state.camera.position.y) * 0.1
+        // state.camera.lookAt(shipRef.current.position.x, shipRef.current.position.y, 0)
 
         // 5. Sync position to store
         setShipPosition(shipRef.current.position.clone())
