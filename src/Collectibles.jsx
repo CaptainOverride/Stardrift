@@ -3,6 +3,7 @@ import { useFrame } from '@react-three/fiber'
 import { Vector3, MathUtils } from 'three'
 import { useStore } from './store'
 import { audio } from './SoundManager'
+import { triggerExplosion } from './ParticleSystem'
 
 export function Collectibles({ count = 20 }) {
     const { shipPosition, increaseScore } = useStore()
@@ -34,6 +35,7 @@ export function Collectibles({ count = 20 }) {
                 // Collected!
                 increaseScore()
                 audio.playCollectSound()
+                triggerExplosion(mesh.position)
 
                 // Respawn far away
                 mesh.position.x = shipPosition.x + MathUtils.randFloatSpread(50) + (Math.random() > 0.5 ? 20 : -20)

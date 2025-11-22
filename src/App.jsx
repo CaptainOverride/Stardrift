@@ -3,6 +3,7 @@ import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import { Ship } from './Ship'
 import { Background } from './Background'
 import { Collectibles } from './Collectibles'
+import { ParticleSystem } from './ParticleSystem'
 import { useStore } from './store'
 import './App.css'
 
@@ -20,6 +21,7 @@ function App() {
 
         <Ship />
         <Collectibles />
+        <ParticleSystem />
 
         <EffectComposer>
           <Bloom luminanceThreshold={0} luminanceSmoothing={0.9} height={300} />
