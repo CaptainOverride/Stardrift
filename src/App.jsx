@@ -27,9 +27,9 @@ function App() {
         {gameStarted && <Collectibles />}
         <ParticleSystem />
 
-        <EffectComposer>
+        {/* <EffectComposer>
           <Bloom luminanceThreshold={0} luminanceSmoothing={0.9} height={300} />
-        </EffectComposer>
+        </EffectComposer> */}
       </Canvas>
 
       <div className={`ui-layer ${gameStarted ? 'game-active' : 'game-start'}`}>
