@@ -2,6 +2,8 @@
   width: 100%;
   height: 100%;
   position: relative;
+  cursor: pointer;
+  /* Indicate clickable */
 }
 
 .ui-layer {
@@ -11,29 +13,104 @@
   width: 100%;
   height: 100%;
   pointer-events: none;
-  /* Let clicks pass through to the canvas */
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  z-index: 10;
+  transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+  padding: 2rem;
+  box-sizing: border-box;
 }
 
+/* --- Start Screen State --- */
+.ui-layer.game-start {
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.3);
+  /* Slight dim */
+}
+
+.ui-layer.game-start h1 {
+  font-size: 6rem;
+  letter-spacing: 1rem;
+}
+
+/* --- Active Game State --- */
+.ui-layer.game-active {
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.ui-layer.game-active .header {
+  transform-origin: top left;
+  transform: scale(0.4);
+  /* Shrink the title */
+}
+
+.ui-layer.game-active h1 {
+  margin: 0;
+}
+
+/* --- Components --- */
 h1 {
   font-size: 4rem;
   font-weight: 800;
   letter-spacing: 0.5rem;
   margin: 0;
   background: linear-gradient(to bottom, #ffffff, #aaaaaa);
+  background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+  transition: all 0.8s ease;
 }
 
 p {
-  font-size: 1rem;
-  color: #888;
-  letter-spacing: 0.2rem;
+  font-size: 1.2rem;
+  color: #00ffff;
+  letter-spacing: 0.3rem;
   text-transform: uppercase;
-  margin-top: 1rem;
+  margin-top: 1.5rem;
+  text-align: center;
+  font-weight: 600;
+  text-shadow: 0 0 10px #00ffff;
+}
+
+.score-board {
+  position: absolute;
+  top: 2rem;
+  right: 2rem;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #ff00ff;
+  text-shadow: 0 0 15px #ff00ff;
+  letter-spacing: 0.2rem;
+  animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* --- Animations --- */
+@keyframes blink {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.3;
+  }
+}
+
+.blink {
+  animation: blink 2s infinite;
+}
+
+@keyframes popIn {
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }

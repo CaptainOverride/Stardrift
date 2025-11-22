@@ -9,7 +9,10 @@ export function Ship() {
     const speed = 0.1
     const friction = 0.95 // "Drift" factor (lower = slippery, higher = sharp)
     const velocity = useRef(new Vector3(0, 0, 0))
-    const setShipPosition = useStore((state) => state.setShipPosition)
+    const { setShipPosition, gameStarted } = useStore((state) => ({
+        setShipPosition: state.setShipPosition,
+        gameStarted: state.gameStarted
+    }))
 
     // Track keys
     const keys = useRef({
@@ -31,10 +34,12 @@ export function Ship() {
         if (!shipRef.current) return
 
         // 1. Calculate Thrust
-        if (keys.current.ArrowUp || keys.current.w) velocity.current.y += speed * 0.1
-        if (keys.current.ArrowDown || keys.current.s) velocity.current.y -= speed * 0.1
-        if (keys.current.ArrowLeft || keys.current.a) velocity.current.x -= speed * 0.1
-        if (keys.current.ArrowRight || keys.current.d) velocity.current.x += speed * 0.1
+        if (gameStarted) {
+            if (keys.current.ArrowUp || keys.current.w) velocity.current.y += speed * 0.1
+            if (keys.current.ArrowDown || keys.current.s) velocity.current.y -= speed * 0.1
+            if (keys.current.ArrowLeft || keys.current.a) velocity.current.x -= speed * 0.1
+            if (keys.current.ArrowRight || keys.current.d) velocity.current.x += speed * 0.1
+        }
 
         // 2. Apply Physics (Velocity + Friction)
         velocity.current.multiplyScalar(friction)
